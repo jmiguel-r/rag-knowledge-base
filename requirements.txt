@@ -1,0 +1,10 @@
+langchain==0.3.14
+langchain-community==0.3.14
+langchain-ollama==0.2.3
+langchain-chroma==0.2.2
+chromadb==0.6.3
+beautifulsoup4==4.12.3
+requests==2.32.3
+tiktoken==0.8.0
+python-dotenv==1.0.1
+rich==13.9.4
