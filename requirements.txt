@@ -3,6 +3,7 @@ langchain-community==0.3.14
 langchain-ollama==0.2.3
 langchain-chroma==0.2.2
 chromadb==0.6.3
+langgraph>=0.2.0
 beautifulsoup4==4.12.3
 requests==2.32.3
 tiktoken==0.8.0

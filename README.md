@@ -65,6 +65,70 @@ Answer + Sources
 
 ---
 
+## 🚀 v2 — Agentic RAG with LangGraph
+
+### v1 vs v2 Comparison
+
+| Aspect | v1 — `rag.py` | v2 — `agent.py` |
+|---|---|---|
+| **Orchestration** | LangChain LCEL (linear chain) | LangGraph StateGraph (cyclic graph) |
+| **Retrieval** | Single-shot, no validation | Graded + retry loop (max 3 iterations) |
+| **Query** | Fixed, as typed | Rewritten by LLM on each retry |
+| **Document Quality** | All retrieved chunks used | Only LLM-graded relevant chunks kept |
+| **Failure Handling** | Returns whatever was retrieved | Retries with an improved query up to 3× |
+| **State** | Implicit (chain variables) | Explicit `AgentState` TypedDict |
+| **Observability** | Status spinner | Step-by-step node execution logging |
+
+### Graph Flow
+
+```
+                    ┌─────────┐
+                    │  START  │
+                    └────┬────┘
+                         │
+                         ▼
+                   ┌───────────┐
+                   │  retrieve │  ← ChromaDB similarity search (k=4)
+                   └─────┬─────┘
+                         │
+                         ▼
+               ┌──────────────────┐
+               │ grade_documents  │  ← LLM grades each chunk: yes / no
+               └────────┬─────────┘
+                        │
+            ┌───────────┴────────────┐
+            │     should_retry()     │
+            └──┬──────────────────┬──┘
+  not relevant │  iterations < 3  │  relevant  OR  iterations ≥ 3
+               ▼                  ▼
+      ┌────────────────┐    ┌──────────┐
+      │ rewrite_query  │    │ generate │  ← Grounded LLM answer
+      └───────┬────────┘    └────┬─────┘
+              │  (loop back)     │
+              └──► retrieve      ▼
+                                END
+```
+
+### Run v2
+
+```bash
+python agent.py
+```
+
+Type your questions as normal. The agent will log each pipeline step — retrieval, grading, and optional rewrites — before printing the final answer with source attribution.
+
+### Key Concepts Demonstrated
+
+| Concept | Implementation |
+|---|---|
+| **LangGraph StateGraph** | Cyclic graph with typed state, conditional edges, and explicit transitions |
+| **Adaptive Retrieval** | Query rewriting loop that improves recall on unsuccessful retrievals |
+| **LLM-as-Judge** | Dedicated `grade_documents` node scores each chunk individually |
+| **Bounded Iteration** | `MAX_ITER = 3` prevents infinite retry loops |
+| **Explicit State** | `AgentState` TypedDict makes every agent decision inspectable at runtime |
+
+---
+
 ## 🤖 Models Used
 
 ### `nomic-embed-text` — Embeddings
